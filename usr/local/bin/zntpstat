@@ -9,6 +9,9 @@ import argparse
 import errno
 import json
 
+# Set global variables
+VERSION = "1.0"
+
 # Define helper functions
 def getPeers():
     rawOutput = subprocess.Popen(['ntpq', '-p'], stdout=subprocess.PIPE).communicate()[0]
@@ -38,6 +41,7 @@ def getPeers():
 
 # Handle Script Arguments
 parser = argparse.ArgumentParser(prog="zntpstat", description="Exectues status checks on an ntpd server, parsing the output for use by a Zabbix monitoring server.")
+parser.add_argument('-v', action='store_true', help="Returns the version of zntpstat.")
 parser.add_argument('-c', action='store_true', help="Checks the agent system for compatibility with this script.")
 parser.add_argument('-s', action='store_true', help="Returns that up/down state of the service.")
 parser.add_argument('-p', action='store_true', help="Returns a Zabbix-compliant JSON string containing the ntpd configuration's servers.")
@@ -133,6 +137,8 @@ def reliability():
     response = json.dumps({"synced": syncState})
     print response
 
+def version():
+    print "Version {0}".format(VERSION)
 
 
 # Route arguments to methods
@@ -154,6 +160,10 @@ if options.p is True:
 
 if options.r is True:
     reliability()
+    exit(1)
+
+if options.v is True:
+    version()
     exit(1)
 
 if options.a is not None:
