@@ -1,0 +1,161 @@
+#!/usr/bin/python
+
+# Import required libraries
+import sys
+import os
+import platform
+import subprocess
+import argparse
+import errno
+import json
+
+# Define helper functions
+def getPeers():
+    rawOutput = subprocess.Popen(['ntpq', '-p'], stdout=subprocess.PIPE).communicate()[0]
+
+    preparedOutput = []
+    for line in rawOutput.splitlines():
+        line = line.strip()
+        line = line.split()
+        if not line:continue
+        preparedOutput.append(line)
+    
+    preparedOutput.pop(1)
+
+    finalOutput = []
+    header = preparedOutput[0]
+    preparedOutput.pop(0)
+    newDictItem = {}
+    for record in preparedOutput:
+        for i in range(0, len(header)):
+            newDictItem[header[i]] = record[i]
+        finalOutput.append(newDictItem)
+        newDictItem = {}
+    
+    return finalOutput
+
+
+
+# Handle Script Arguments
+parser = argparse.ArgumentParser(prog="zntpstat", description="Exectues status checks on an ntpd server, parsing the output for use by a Zabbix monitoring server.")
+parser.add_argument('-c', action='store_true', help="Checks the agent system for compatibility with this script.")
+parser.add_argument('-s', action='store_true', help="Returns that up/down state of the service.")
+parser.add_argument('-p', action='store_true', help="Returns a Zabbix-compliant JSON string containing the ntpd configuration's servers.")
+parser.add_argument('-a', action='store', help="Returns a Zabbix-complaint JSON string containing the ntpd sync status.")
+parser.add_argument('-r', action='store_true', help="Returns in the reliability of the server as either synced, unsynced, or indeterminate (it can't reach it's sync servers)")
+options = parser.parse_args()
+
+
+
+# Begin actions functions
+def check_config():
+    isCompatible = True
+    
+    # Check that python is at least at version 2.7
+    success = sys.version_info >= (2, 7)
+    if success: print "[\033[92m Success \033[0m] Host {0} has Python 2.7 or greater installed".format(platform.uname()[1])
+    if not success: 
+        print "[\033[31m Failure \033[0m] Host {0} has Python 2.7 or greater installed".format(platform.uname()[1])
+        isCompatible = False
+
+    # Check for the ntpq program on the system
+    success = os.system('command -v ntpq >> /dev/null') is 0
+    if success: print "[\033[92m Success \033[0m] Host {0} has ntpq installed".format(platform.uname()[1])
+    if not success: 
+        print "[\033[31m Failure \033[0m] Host {0} has ntpq installed"
+        isCompatible = False
+
+    # Check for the ntpstat program on the system
+    success = os.system('command -v ntpstat >> /dev/null') is 0
+    if success: print "[\033[92m Success \033[0m] Host {0} has ntpstat installed".format(platform.uname()[1])
+    if not success: 
+        print "[\033[31m Failure \033[0m] Host {0} has ntpstat installed".format(platform.uname()[1])
+        isCompatible = False
+
+    # Check for the systemctl program on the system
+    success = os.system('command -v systemctl >> /dev/null') is 0
+    if success: print "[\033[92m Success \033[0m] Host {0} has systemctl installed".format(platform.uname()[1])
+    if not success: 
+        print "[\033[31m Failure \033[0m] Host {0} has systemctl installed".format(platform.uname()[1])
+        isCompatible = False
+
+    # Overal readiness of the system
+    print
+    if isCompatible: print "\033[92m Host {0} is capable of running zntpstat \033[0m".format(platform.uname()[1])
+    if not isCompatible: 
+        print "\033[31m Host {0} is not capable of running zntpstat \033[0m".format(platform.uname()[1])
+
+    # Return an appropriate exit code to the system
+    sys.exit(os.EX_OK if isCompatible else os.EX_CONFIG)
+
+
+def state():
+    isActive = os.system('systemctl is-active ntpd >> /dev/null') is 0
+    response = json.dumps({ "active": isActive})
+    print response
+
+
+def populate():
+    peers = getPeers() # needs to return peers only
+
+    for i in range(0, len(peers)):
+        peers[i] = peers[i]["remote"]
+
+    response = json.dumps(peers)
+    print response
+
+
+def sync_status(server):
+    peers = getPeers()
+
+    if(server.strip().lower() == "all"):
+        print json.dumps(peers)
+    
+    else:
+        for p in peers:
+            if p["remote"].strip().lower() == server.strip().lower():
+                print json.dumps(p)
+
+
+def reliability():
+    isSynced = os.system('ntpstat >> /dev/null')
+    syncState = ""
+
+    if isSynced is 0:
+        syncState = "synchronised"
+    
+    if isSynced is 1:
+        syncState = "unsynchronised"
+    
+    if isSynced is 2:
+        syncState = "indeterminant"
+
+    response = json.dumps({"synced": syncState})
+    print response
+
+
+
+# Route arguments to methods
+if len(sys.argv) is 1:
+    parser.print_help()
+    exit(1)
+
+if options.c is True:
+    check_config()
+    exit(1)
+
+if options.s is True:
+    state()
+    exit(1)
+
+if options.p is True:
+    populate()
+    exit(1)
+
+if options.r is True:
+    reliability()
+    exit(1)
+
+if options.a is not None:
+    sync_status(options.a)
+    exit(1)
