@@ -1,0 +1,1 @@
+# Detailed NTPd Monitoring for Zabbix
