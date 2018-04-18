@@ -18,8 +18,7 @@ def getPeers():
 
     preparedOutput = []
     for line in rawOutput.splitlines():
-        line = line.strip()
-        line = line.split()
+        line = line.strip().split()
         if not line:continue
         preparedOutput.append(line)
     
@@ -28,12 +27,12 @@ def getPeers():
     finalOutput = []
     header = preparedOutput[0]
     preparedOutput.pop(0)
-    newDictItem = {}
+
     for record in preparedOutput:
+        newDictItem = {}
         for i in range(0, len(header)):
             newDictItem[header[i]] = record[i]
         finalOutput.append(newDictItem)
-        newDictItem = {}
     
     return finalOutput
 
