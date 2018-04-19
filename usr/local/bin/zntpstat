@@ -22,6 +22,8 @@ def getPeers():
         if not line:continue
         preparedOutput.append(line)
     
+    if len(preparedOutput) is 0: return []
+    
     preparedOutput.pop(1)
 
     finalOutput = []
