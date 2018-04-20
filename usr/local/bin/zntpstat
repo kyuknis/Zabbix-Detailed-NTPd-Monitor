@@ -30,6 +30,10 @@ def getPeers():
     header = preparedOutput[0]
     preparedOutput.pop(0)
 
+    # Turn headers into keys
+    for i in range(0, len(header)):
+        header[i] = "{{#ZNTPSTAT{0}}}".format(header[i].upper())
+
     for record in preparedOutput:
         newDictItem = {}
         for i in range(0, len(header)):
@@ -96,30 +100,30 @@ def check_config():
 
 def state():
     isActive = os.system('systemctl is-active ntpd >> /dev/null') is 0
-    response = json.dumps({ "active": isActive})
+    response = json.dumps({ "data": [{ "active": isActive}] })
     print response
 
 
 def populate():
-    peers = getPeers() # needs to return peers only
+    rawPeers = getPeers() # needs to return peers only
+    response = { "data": [] }
 
-    for i in range(0, len(peers)):
-        peers[i] = peers[i]["remote"]
+    for i in range(0, len(rawPeers)):
+        response["data"].append({"{#NTPSERVER}": rawPeers[i]["{#ZNTPSTATREMOTE}"]})
 
-    response = json.dumps(peers)
-    print response
+    print json.dumps(response)
 
 
 def sync_status(server):
     peers = getPeers()
 
     if(server.strip().lower() == "all"):
-        print json.dumps(peers)
+        print json.dumps({ "data": [peers] })
     
     else:
         for p in peers:
-            if p["remote"].strip().lower() == server.strip().lower():
-                print json.dumps(p)
+            if p["{#ZNTPSTATREMOTE}"].strip().lower() == server.strip().lower():
+                print json.dumps({ "data": [p] })
 
 
 def reliability():
@@ -135,8 +139,9 @@ def reliability():
     if isSynced is 2:
         syncState = "indeterminant"
 
-    response = json.dumps({"synced": syncState})
+    response = json.dumps({ "data": [{"synced": syncState}] })
     print response
+
 
 def version():
     print "Version {0}".format(VERSION)
