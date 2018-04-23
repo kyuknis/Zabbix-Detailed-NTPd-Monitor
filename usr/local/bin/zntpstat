@@ -13,7 +13,7 @@ import json
 VERSION = "1.0"
 
 # Define helper functions
-def getPeers():
+def get_peers():
     rawOutput = subprocess.Popen(['ntpq', '-p'], stdout=subprocess.PIPE).communicate()[0]
 
     preparedOutput = []
@@ -106,7 +106,7 @@ def state():
 
 
 def populate():
-    rawPeers = getPeers() # needs to return peers only
+    rawPeers = get_peers() # needs to return peers only
     response = { "data": [] }
 
     for p in rawPeers:
@@ -118,7 +118,7 @@ def populate():
 
 
 def sync_status(server):
-    peers = getPeers()
+    peers = get_peers()
 
     if(server.strip().lower() == "all"):
         print json.dumps({ "data": peers })
