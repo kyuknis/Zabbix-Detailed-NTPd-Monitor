@@ -43,8 +43,6 @@ def getPeers():
 
     return finalOutput
 
-print(json.dumps(getPeers()))
-
 
 
 # Handle Script Arguments
@@ -123,7 +121,8 @@ def sync_status(server):
     peers = getPeers()
 
     if(server.strip().lower() == "all"):
-        print json.dumps({ "data": [peers] })
+        print json.dumps({ "data": peers })
+
     else:
         for p in peers:
             if p["{#ZNTPSTATREMOTE}"].strip().lower() == server.strip().lower():
