@@ -135,8 +135,10 @@ def sync_status(server, key):
         foundKey = False
         for a in response["data"]:
             if key in a:
-                response["data"] = [a]
+                response = a[key]
                 foundKey = True
+                print response
+                return
         
         if not foundKey:
             print "Invalid key \"{0}\". Run \"zntpstat --help\" for more information.".format(key)
