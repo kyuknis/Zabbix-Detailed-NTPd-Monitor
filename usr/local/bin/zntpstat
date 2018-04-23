@@ -125,8 +125,9 @@ def sync_status(server):
 
     else:
         for p in peers:
-            if p["{#ZNTPSTATREMOTE}"].strip().lower() == server.strip().lower():
-                print json.dumps({ "data": [p] })
+            for a in p:
+                if "{#ZNTPSTATREMOTE}" in a and a["{#ZNTPSTATREMOTE}"].strip().lower() == server.strip().lower():
+                    print json.dumps({ "data": p })
 
 
 def reliability():
