@@ -33,19 +33,22 @@ def getPeers():
     # Turn headers into keys
     for i in range(0, len(header)):
         header[i] = "{{#ZNTPSTAT{0}}}".format(header[i].upper())
+    
 
     for record in preparedOutput:
-        newDictItem = {}
+        newRecord = []
         for i in range(0, len(header)):
-            newDictItem[header[i]] = record[i]
-        finalOutput.append(newDictItem)
+            newRecord.append({ header[i]: record[i] })
+        finalOutput.append(newRecord)
 
     return finalOutput
+
+print(json.dumps(getPeers()))
 
 
 
 # Handle Script Arguments
-parser = argparse.ArgumentParser(prog="zntpstat", description="Exectues status checks on an ntpd server, parsing the output for use by a Zabbix monitoring server.")
+parser = argparse.ArgumentParser(prog="zntpstat {0}".format(VERSION), description="Exectues status checks on an ntpd server, parsing the output for use by a Zabbix monitoring server.")
 parser.add_argument('-v', action='store_true', help="Returns the version of zntpstat.")
 parser.add_argument('-c', action='store_true', help="Checks the agent system for compatibility with this script.")
 parser.add_argument('-s', action='store_true', help="Returns that up/down state of the service.")
