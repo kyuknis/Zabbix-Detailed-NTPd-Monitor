@@ -52,6 +52,7 @@ parser.add_argument('-c', action='store_true', help="Checks the agent system for
 parser.add_argument('-s', action='store_true', help="Returns that up/down state of the service.")
 parser.add_argument('-p', action='store_true', help="Returns a Zabbix-compliant JSON string containing the ntpd configuration's servers.")
 parser.add_argument('-a', action='store', help="Returns a Zabbix-complaint JSON string containing the ntpd sync status.")
+parser.add_argument('-k', action='store', help="For use only with -a. When specified, returns only the value only for the specified attribute key.")
 parser.add_argument('-r', action='store_true', help="Returns in the reliability of the server as either synced, unsynced, or indeterminate (it can't reach it's sync servers)")
 options = parser.parse_args()
 
@@ -117,17 +118,31 @@ def populate():
     print json.dumps(response)
 
 
-def sync_status(server):
+def sync_status(server, key):
     peers = get_peers()
+    response = {"data": []}
 
     if(server.strip().lower() == "all"):
-        print json.dumps({ "data": peers })
+        response["data"] = peers
 
     else:
         for p in peers:
             for a in p:
                 if "{#ZNTPSTATREMOTE}" in a and a["{#ZNTPSTATREMOTE}"].strip().lower() == server.strip().lower():
-                    print json.dumps({ "data": p })
+                    response["data"] = p
+    
+    if key is not None and server.strip().lower() is not "all":
+        foundKey = False
+        for a in response["data"]:
+            if key in a:
+                response["data"] = [a]
+                foundKey = True
+        
+        if not foundKey:
+            print "Invalid key \"{0}\". Run \"zntpstat --help\" for more information.".format(key)
+            return
+
+    print json.dumps(response)
 
 
 def reliability():
@@ -177,5 +192,5 @@ if options.v is True:
     exit(1)
 
 if options.a is not None:
-    sync_status(options.a)
+    sync_status(options.a, options.k)
     exit(1)
