@@ -130,7 +130,7 @@ def sync_status(server, key):
             for a in p:
                 if "{#ZNTPSTATREMOTE}" in a and a["{#ZNTPSTATREMOTE}"].strip().lower() == server.strip().lower():
                     response["data"] = p
-    
+
     if key is not None and server.strip().lower() is not "all":
         foundKey = False
         for a in response["data"]:
@@ -194,5 +194,10 @@ if options.v is True:
     exit(1)
 
 if options.a is not None:
-    sync_status(options.a, options.k)
+
+    if options.k is None: 
+        sync_status(options.a, None)
+    else: 
+        sync_status(options.a, "{{#{0}}}".format(options.k))
+
     exit(1)
