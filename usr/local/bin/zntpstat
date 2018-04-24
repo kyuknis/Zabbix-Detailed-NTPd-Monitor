@@ -105,8 +105,7 @@ def check_config():
 
 def state():
     isActive = os.system('systemctl is-active ntpd >> /dev/null') is 0
-    response = json.dumps({ "data": [{ "active": isActive}] })
-    print response
+    print isActive
 
 
 def populate():
@@ -152,19 +151,7 @@ def sync_status(server, key):
 
 def reliability():
     isSynced = os.system('ntpstat >> /dev/null')
-    syncState = ""
-
-    if isSynced is 0:
-        syncState = "synchronised"
-
-    if isSynced is 1:
-        syncState = "unsynchronised"
-
-    if isSynced is 2:
-        syncState = "indeterminant"
-
-    response = json.dumps({ "data": [{"synced": syncState}] })
-    print response
+    print isSynced
 
 
 def version():
