@@ -36,9 +36,12 @@ def get_peers():
     
 
     for record in preparedOutput:
+
         newRecord = []
         for i in range(0, len(header)):
+            if header[i] == "{#ZNTPSTATREMOTE}": record[i] = record[i][1:]
             newRecord.append({ header[i]: record[i] })
+
         finalOutput.append(newRecord)
 
     return finalOutput
