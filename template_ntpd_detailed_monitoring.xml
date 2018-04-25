@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>3.0</version>
-    <date>2018-04-24T20:47:41Z</date>
+    <date>2018-04-25T15:09:54Z</date>
     <groups>
         <group>
             <name>Linux servers</name>
@@ -92,7 +92,7 @@
                     <delay_flex/>
                     <params/>
                     <ipmi_sensor/>
-                    <data_type>3</data_type>
+                    <data_type>0</data_type>
                     <authtype>0</authtype>
                     <username/>
                     <password/>
@@ -463,4 +463,26 @@
             <screens/>
         </template>
     </templates>
+    <triggers>
+        <trigger>
+            <expression>{Template NTPd Detailed Monitoring:zntpstat.state.prev()}&lt;&gt;0</expression>
+            <name>NTPd Daemon is Down</name>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description/>
+            <type>0</type>
+            <dependencies/>
+        </trigger>
+        <trigger>
+            <expression>{Template NTPd Detailed Monitoring:zntpstat.reliability.last(#1,5)}&gt;0</expression>
+            <name>NTPd Server Unreliable or Out of Sync</name>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description/>
+            <type>0</type>
+            <dependencies/>
+        </trigger>
+    </triggers>
 </zabbix_export>
