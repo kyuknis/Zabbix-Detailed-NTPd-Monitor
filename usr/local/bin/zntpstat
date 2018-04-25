@@ -104,7 +104,7 @@ def check_config():
 
 
 def state():
-    isActive = os.system('systemctl is-active ntpd >> /dev/null') is 0
+    isActive = os.system('systemctl is-active ntpd >> /dev/null')
     print isActive
 
 
