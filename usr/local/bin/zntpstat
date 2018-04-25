@@ -114,7 +114,6 @@ def populate():
 
     for p in rawPeers:
         for a in p:
-            # response["data"].append({"{#NTPSERVER}": rawPeers[i]["{#ZNTPSTATREMOTE}"]})
             if "{#ZNTPSTATREMOTE}" in a: response["data"].append(a)
 
     print json.dumps(response)
